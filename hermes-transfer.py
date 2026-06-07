@@ -8,17 +8,15 @@ Copyright (c) 2026
 Pack, transfer, deploy & sync your Hermes Agent persona across machines.
 
 Usage:
-  hermes-transfer.py pack [--output PACKAGE.revive] [--exclude-sensitive]
-  hermes-transfer.py apply <package.revive>
-  hermes-transfer.py deploy <user@host> [--key KEY] [--port PORT] [--package PACKAGE]
+  # True Image style — just backup & restore
+  hermes-transfer.py backup [--exclude-sensitive]
+  hermes-transfer.py restore <package.revive>
+
+  # Advanced
+  hermes-transfer.py deploy <user@host> [--key KEY]
   hermes-transfer.py target add <name> <user@host>
-  hermes-transfer.py target list
-  hermes-transfer.py target deploy <name>
   hermes-transfer.py target sync <name>
-  hermes-transfer.py target status <name>
-  hermes-transfer.py target remove <name>
-  hermes-transfer.py target rename <name> <new-name>
-  hermes-transfer.py gui [--port PORT] [--public]
+  hermes-transfer.py gui
   hermes-transfer.py init
   hermes-transfer.py help
 """
@@ -1395,8 +1393,8 @@ def main():
         formatter_class=argparse.RawDescriptionHelpFormatter,
         epilog="""\
 Subcommands:
-  pack                      Pack Hermes data into a .revive portable package
-  apply <package>           Restore a .revive package locally
+  backup                    Backup Hermes data into a portable .revive file
+  restore <package>         Restore Hermes data from a .revive file
   deploy <host>             One-click SSH deployment to a remote host
   gui                       Launch Web GUI (Gradio)
 
@@ -1412,33 +1410,49 @@ Subcommands:
   help                      Show this help
 
 Examples:
-  hermes-transfer.py pack
-  hermes-transfer.py pack --output ~/my-backup.revive --exclude-sensitive
-  hermes-transfer.py apply ~/my-backup.revive
+  # True Image style — just backup & restore
+  hermes-transfer.py backup
+  hermes-transfer.py restore ~/my-backup.revive
+
+  # Advanced
+  hermes-transfer.py backup --exclude-sensitive
+  hermes-transfer.py restore ~/my-backup.revive --dry-run
   hermes-transfer.py deploy user@hostname --key ~/.ssh/id_ed25519
-  hermes-transfer.py target add home-server user@hostname
-  hermes-transfer.py target deploy home-server
-  hermes-transfer.py target sync home-server
   """
     )
 
     subparsers = parser.add_subparsers(dest="command")
 
+    # pack / backup (aliases)
     # pack
-    p = subparsers.add_parser("pack", help="打包 Hermes 資料成 .revive 可攜套件")
-    p.add_argument("-o", "--output", help="輸出路徑（預設: ~/.hermes/revive/cache/）")
-    p.add_argument("--exclude-sensitive", action="store_true",
+    p_pack = subparsers.add_parser("pack", help="打包 Hermes 資料成 .revive 可攜套件")
+    p_pack.add_argument("-o", "--output", help="輸出路徑（預設: ~/.hermes/revive/cache/）")
+    p_pack.add_argument("--exclude-sensitive", action="store_true",
                    help="排除 .env 和 auth.json 等敏感檔案")
-    p.set_defaults(func=cmd_pack)
+    p_pack.set_defaults(func=cmd_pack)
+    # backup = same as pack
+    p_backup = subparsers.add_parser("backup", help="Backup Hermes data to a portable .revive file")
+    p_backup.add_argument("-o", "--output", help="Output path (default: ~/.hermes/revive/cache/)")
+    p_backup.add_argument("--exclude-sensitive", action="store_true",
+                   help="Exclude .env and auth.json")
+    p_backup.set_defaults(func=cmd_pack)
 
-    # apply
-    p = subparsers.add_parser("apply", help="本機還原 .revive 套件")
-    p.add_argument("package", help=".revive 套件路徑")
-    p.add_argument("--exclude-sensitive", action="store_true",
+    # apply / restore (aliases)
+    p_apply = subparsers.add_parser("apply", help="本機還原 .revive 套件")
+    p_apply.add_argument("package", help=".revive 套件路徑")
+    p_apply.add_argument("--exclude-sensitive", action="store_true",
                    help="套件內含敏感檔案時跳過")
-    p.add_argument("--dry-run", action="store_true",
+    p_apply.add_argument("--dry-run", action="store_true",
                    help="模擬還原，不實際寫入檔案")
-    p.set_defaults(func=cmd_apply)
+    p_apply.set_defaults(func=cmd_apply)
+    # restore = same as apply
+    p_restore = subparsers.add_parser("restore", help="Restore Hermes data from a .revive file")
+    p_restore.add_argument("package", help="Path to .revive file")
+    p_restore.add_argument("--exclude-sensitive", action="store_true",
+                   help="Skip sensitive files")
+    p_restore.add_argument("--dry-run", action="store_true",
+                   help="Preview without writing any files")
+    p_restore.set_defaults(func=cmd_apply)
 
     # deploy
     p = subparsers.add_parser("deploy", help="一鍵 SSH 部署到遠端主機")
