@@ -1670,16 +1670,16 @@ def cmd_gui(args: argparse.Namespace):
                             value="",
                         )
                         deploy_key = gr.Textbox(
-                            label="SSH 私鑰", placeholder="~/.ssh/id_ed25519",
-                            value="~/.ssh/id_ed25519",
+                            label="SSH Private Key", placeholder="~/.ssh/id_ed25519",
+                            value="",
                         )
                     with gr.Column(scale=1):
-                        deploy_port = gr.Number(label="SSH 埠號", value=22, minimum=1, maximum=65535)
-                        deploy_no_install = gr.Checkbox(label="跳過 Hermes 安裝", value=False)
-                        deploy_exclude = gr.Checkbox(label="排除敏感檔案", value=True)
+                        deploy_port = gr.Number(label="SSH Port", value=22, minimum=1, maximum=65535)
+                        deploy_no_install = gr.Checkbox(label="Skip Hermes install", value=False)
+                        deploy_exclude = gr.Checkbox(label="Exclude sensitive files", value=True)
                 with gr.Row():
                     deploy_pkg = gr.File(
-                        label="自訂套件（留空則自動打包）",
+                        label="Custom package (leave empty to auto-pack)",
                         file_types=[".revive", ".zip"],
                     )
                 with gr.Row():
@@ -1714,10 +1714,10 @@ def cmd_gui(args: argparse.Namespace):
             with gr.TabItem("📋 目標機管理"):
                 gr.Markdown("## 註冊與管理目標機")
                 with gr.Row():
-                    t_name = gr.Textbox(label="目標名稱", placeholder="home-server", scale=1)
-                    t_host = gr.Textbox(label="主機", placeholder="user@hostname", scale=2)
-                    t_key = gr.Textbox(label="SSH 私鑰", placeholder="~/.ssh/id_ed25519", scale=2)
-                    t_port = gr.Number(label="埠號", value=22, minimum=1, maximum=65535, scale=1)
+                    t_name = gr.Textbox(label="Target name", placeholder="home-server", scale=1)
+                    t_host = gr.Textbox(label="Host", placeholder="user@hostname", scale=2)
+                    t_key = gr.Textbox(label="SSH Key", placeholder="~/.ssh/id_ed25519", scale=2)
+                    t_port = gr.Number(label="Port", value=22, minimum=1, maximum=65535, scale=1)
                 with gr.Row():
                     t_add_btn = gr.Button("➕ 新增目標", variant="primary", size="sm")
                     t_refresh_btn = gr.Button("🔄 重新整理", size="sm")
